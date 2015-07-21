@@ -1,0 +1,285 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+      
+<div class="container">
+
+  <div ng-show="currentPanel===0" layout="column" flex>
+    <div layout="row">
+          <div class="page-header" flex>
+            <h2 class="text-center">{{allTrades[0].securityDescription + '  ' + allTrades[0].securityType}}</h2>
+          </div>
+        </div>
+  
+        <div>
+          
+             <!-- <input type="radio" ng-model="allocateDisabled" name="register" id="statsRadio" ng-click="radioButton()" ng-value="true" /> -->
+   <!--          <button id="statsButton" class="btn btn-primary" ng-disabled="{{allocateDisabled}}" ng-click="allocateSales()">Allocate Sales</button>
+
+          <button id="statsButton" class="btn btn-primary" ng-disabled="{{statsDisabled}}" ng-click="generateStats()">Generate Summary Stats</button>
+
+          <button id="statsButton" class="btn btn-primary" ng-init="resetDisabled = true" ng-disabled="{{resetDisabled}}" ng-click="resetData()">Reset Data</button> -->
+
+        <div layout="row">
+          <div class="eachButton" flex="33">
+            <md-button class="md-raised md-primary" ng-disabled="allocateButton" required ng-init="allocateButton=true" ng-click="allocateSales()">Allocate Sales</md-button>
+            <md-checkbox aria-label="toggle" ng-click="allocateButton=!allocateButton">enable</md-checkbox>
+          </div>
+          <div class="eachButton" flex="33">
+            <md-button class="md-raised md-primary" ng-disabled="statsButton" required ng-init="statsButton=true" ng-click="generateStats()">Generate Stats</md-button>
+            <md-checkbox aria-label="toggle" ng-click="statsButton=!statsButton">enable</md-checkbox>
+          </div>
+          <div class="eachButton" flex="33">
+            <md-button class="md-raised md-primary" ng-disabled="resetButton" required ng-init="resetButton=true" ng-click="resetData()">Reset Data</md-button>
+            <md-checkbox aria-label="toggle" ng-click="resetButton=!resetButton">enable</md-checkbox>
+          </div>
+        </div>
+    
+
+    <!--       <md-checkbox ng-model="data.cb1" aria-label="Checkbox 1">
+          Checkbox 1: {{ data.cb1 }}
+        </md-checkbox> -->
+<!-- 
+          <md-button id="allocateButton" class="md-raised md-primary" ng-click="allocateSales(); showNextPanel(currentPanel)">Allocate Sales</md-button>
+
+          <md-button id="statsButton" class="md-raised md-primary" ng-click="generateStats(); showNextPanel(currentPanel)">Generate Summary Stats</md-button>
+
+          <md-button id="resetButton" class="md-raised md-primary" ng-disabled="{{resetDisabled}}" ng-click="resetAllocations()">Reset Data</md-button> -->
+ 
+
+<!--           <md-content class="md-padding tradeData">
+          <md-tabs md-dynamic-height md-border-bottom>
+          <md-tab ng-repeat="account in accounts"  label="{{account}}">
+          <md-content class="md-padding">
+          <table class="table table-striped table-condensed table-responsive disable-text-selection">
+            <tbody class="time-input tradeData">
+              <tr>
+                <td><b>Trade Date</b></td>
+                <td><b>Transaction Type</b></td>
+                <td><b>Currency</b></td>
+                <td><b>Quantity</b></td>
+                <td><b>Price Per Share</b></td>
+              </tr>
+              <tr ng-repeat="trade in allTrades | filter: { account: account }">
+                <td>{{trade.tradeDate}}</td>
+                <td>{{trade.transactionType}}</td>
+                <td>{{trade.currency}}</td>
+                <td>{{trade.quantity}}</td>
+                <td>{{trade.pricePerShare}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </md-content>
+      </md-tab>
+      </md-tabs>
+      </md-content> -->
+
+      </div>
+  </div>
+
+
+      <div ng-show="currentPanel===1" layout="column" flex>
+
+        <section layout="row" layout-sm="column" layout-align="left center">
+          <md-button class="md-raised" ng-click="showPrevPanel(currentPanel)">Back</md-button>
+          <md-button class="md-raised md-primary" ng-click="displayDuraStats(); showNextPanel(currentPanel)">Generate Dura Stats</md-button>
+          <md-button class="md-raised md-warn">Printable Version</md-button>
+          <md-button ng-disabled="true" class="md-raised md-primary">Disabled</md-button>
+        </section>
+
+<!--         <md-input-container flex>
+        <label>Enter Dura Dates</label>
+        <input type="date" ng-model="user.submissionDate">
+      </md-input-container> -->
+
+        <div layout="row">
+
+          <table class="statsTable table table-bordered table-condensed table-responsive disable-text-selection">
+            <tbody>
+              <tr>
+                <td colspan=11 class="titleRow">
+                  <h4>[Client]: Damages Summary (FIFO) in [Case Name]</h4>
+                  <h5>Class Period: {{newStartDate | date:'MMM dd, yyyy'}} to {{newEndDate | date:'MMM dd, yyyy'}}</h5>
+                </td>
+              </tr>
+              <tr class="tableHeadings">
+                <td></td>
+                <td><b>Pre-Class Holdings</b></td>
+                <td><b>Class Period Purchases</b></td>
+                <td><b>Expenditures</b></td>
+                <td><b>Class Period Sales</b></td>
+                <td><b>Class Period Proceeds</b></td>
+                <td><b>Recognized Sales</b></td>
+                <td><b>Recognized Proceeds</b></td>
+                <td><b>Shares Retained</b></td>
+                <td><b>Value of Retained Shares</b></td>
+                <td><b>Damages/Gain</b></td>
+              </tr>
+              <tr ng-repeat="(key, value) in statsByAccountFIFO">
+                <td class="noWrap tableHeadings"><b>{{key}}</b></td>
+                <td class="cellData">{{value.preClassHoldings | number}}</td>
+                <td class="cellData">{{value.classPeriodPurchases | number}}</td>
+                <td class="cellData">{{value.expenditures | number:2}}</td>
+                <td class="cellData">{{value.classPeriodSales | number}}</td>
+                <td class="cellData">{{value.classPeriodProceeds | number:2}}</td>
+                <td class="cellData">{{value.recognizedSales | number}}</td>
+                <td class="cellData">{{value.recognizedProceeds | number:2}}</td>
+                <td class="cellData">{{value.sharesRetained | number}}</td>
+                <td class="cellData">{{value.valueOfRetainedShares | number:2}}</td>
+                <td class="cellData">{{value.damages_gain | number:2}}</td>
+              </tr>
+              <tr>
+                <td class="noWrap tableHeadings"><b>Totals:</b></td>
+                <td class="cellData"><b>{{totalsFIFO.preClassHoldings | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.classPeriodPurchases | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.expenditures | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.classPeriodSales | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.classPeriodProceeds | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.recognizedSales | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.recognizedProceeds | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.sharesRetained | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.valueOfRetainedShares | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.damages_gain | number:2}}</b></td>
+              </tr>
+            </tbody>
+          </table><br><br>
+        </div>
+
+      <div layout="row">
+
+          <table class="statsTable table table-bordered table-condensed table-responsive disable-text-selection">
+            <tbody>
+              <tr>
+                <td colspan=11 class="titleRow">
+                  <h4>[Client]: Damages Summary (LIFO) in [Case Name]</h4>
+                  <h5>Class Period: {{newStartDate | date:'mm/dd/yy'}} to {{newEndDate | date:'mm/dd/yy'}}</h5>
+                </td>
+              </tr>
+              <tr class="tableHeadings">
+                <td></td>
+                <td><b>Pre-Class Holdings</b></td>
+                <td><b>Class Period Purchases</b></td>
+                <td><b>Expenditures</b></td>
+                <td><b>Class Period Sales</b></td>
+                <td><b>Class Period Proceeds</b></td>
+                <td><b>Recognized Sales</b></td>
+                <td><b>Recognized Proceeds</b></td>
+                <td><b>Shares Retained</b></td>
+                <td><b>Value of Retained Shares</b></td>
+                <td><b>Damages/Gain</b></td>
+              </tr>
+              <tr ng-repeat="(key, value) in statsByAccountLIFO">
+                <td class="noWrap tableHeadings"><b>{{key}}</b></td>
+                <td class="cellData">{{value.preClassHoldings | number}}</td>
+                <td class="cellData">{{value.classPeriodPurchases | number}}</td>
+                <td class="cellData">{{value.expenditures | number:2}}</td>
+                <td class="cellData">{{value.classPeriodSales | number}}</td>
+                <td class="cellData">{{value.classPeriodProceeds | number:2}}</td>
+                <td class="cellData">{{value.recognizedSales | number}}</td>
+                <td class="cellData">{{value.recognizedProceeds | number:2}}</td>
+                <td class="cellData">{{value.sharesRetained | number}}</td>
+                <td class="cellData">{{value.valueOfRetainedShares | number:2}}</td>
+                <td class="cellData">{{value.damages_gain | number:2}}</td>
+              </tr>
+              <tr>
+                <td class="noWrap tableHeadings"><b>Totals:</b></td>
+                <td class="cellData"><b>{{totalsLIFO.preClassHoldings | number}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.classPeriodPurchases | number}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.expenditures | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.classPeriodSales | number}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.classPeriodProceeds | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.recognizedSales | number}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.recognizedProceeds | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.sharesRetained | number}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.valueOfRetainedShares | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.damages_gain | number:2}}</b></td>
+              </tr>
+            </tbody>
+          </table><br><br>
+        </div>
+        </div>
+      </div>
+
+
+  <div ng-show="currentPanel===2" layout="column" flex>      
+<!--         <section layout="row" layout-sm="column" layout-align="left center">
+          <md-button class="md-raised" ng-click="showPrevPanel(currentPanel)">Back</md-button>
+        </section> -->
+        <section layout="row" layout-sm="column" layout-align="left center">
+          <md-button class="md-raised" ng-click="showPrevPanel(currentPanel)">Back</md-button>
+        </section>
+<!-- 
+        <h3 class="text-center">Dura Stats</h3>
+ -->
+
+<div layout="row">
+
+  <md-content class="md-padding tradeData">
+    <md-tabs md-selected="selectedIndex" md-dynamic-height md-border-bottom>
+      <md-tab ng-repeat="(account, duraDates) in duraStats"
+              ng-disabled="tab.disabled"
+              label="{{account}}">
+        <div class="demo-tab tab{{$index%4}}" style="padding: 25px; text-align: center;">
+
+
+            <md-content class="md-padding">
+                <md-tabs md-selected="selectedIndex" md-dynamic-height md-border-bottom>
+                  <md-tab ng-repeat="(duraDate, trades) in duraDates"
+                          ng-disabled="tab.disabled"
+                          label="{{duraDate}}">
+                    <div class="demo-tab tab{{$index%4}}" style="padding: 25px; text-align: center;">
+                      <!-- dura table here -->
+
+                      <table class="statsTable table table-bordered table-condensed table-responsive disable-text-selection">
+                        <tbody>
+                          <tr>
+                            <td colspan=5>
+                              <h4>Shares Held Through {{duraDate}}</h4>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td><h5>Trade Date</h5></td>
+                            <td><h5>Shared Retained {{$index}}</h5></td>
+                            <td><h5>Price Per Share</h5></td>
+                            <td><h5>__Drop from $____ to $____ lessor of difference vs. $____</h5></td>
+                            <td><h5>Scenario {{$index}} Damages</h5></td>
+                          </tr>
+                          <tr ng-repeat="trade in trades">
+                            <td>{{trade.tradeDate | date: 'mm/dd/yy'}}</td>
+                            <td>{{trade.sharesRetained | number}}</td>
+                            <td>{{trade.pricePerShare}}</td>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+
+
+                    </div>
+                  </md-tab>
+                </md-tabs>
+              </md-content>
+
+
+            </div>
+          </md-tab>
+        </md-tabs>
+      </md-content>
+    </div>
+
+
+  </div>
+
+
+
+  </div>
+
+</div>
+
+
+<!-- <footer class="footer">
+  <div class="container">
+      <p>Angular Fullstack v2.0.13 |
+        <a href="https://twitter.com/tyhenkel">@tyhenkel</a> |
+         <a href="https://github.com/DaftMonk/generator-angular-fullstack/issues?state=open">Issues</a></p>
+  </div>
+</footer> -->

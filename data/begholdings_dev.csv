@@ -1,0 +1,3 @@
+securityType,securityDescription,account,tradeDate,transactionType,quantity,pricePerShare,currency,allocatables,quantityAdjusted
+ISIN,PETROLEO BRASILEIRO-SPON ADR,Account 1,"2010,05,20",BEGHOLDINGS,780095,,,780095,780095
+ISIN,PETROLEO BRASILEIRO-SPON ADR,Account 2,"2010,05,20",BEGHOLDINGS,2920996,,,2920996,2920996
