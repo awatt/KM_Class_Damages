@@ -4,79 +4,78 @@
 
   <div ng-show="currentPanel===0" layout="column" flex>
     <div layout="row">
-          <div class="page-header" flex>
-            <h2 class="text-center">{{allTrades[0].securityDescription + '  ' + allTrades[0].securityType}}</h2>
-          </div>
+        <div class="page-header" flex>
+          <h3 class="text-center">PETROLEO BRASILEIRO-SPON ADR</h3>
         </div>
-  
-        <div>
-          
-             <!-- <input type="radio" ng-model="allocateDisabled" name="register" id="statsRadio" ng-click="radioButton()" ng-value="true" /> -->
-   <!--          <button id="statsButton" class="btn btn-primary" ng-disabled="{{allocateDisabled}}" ng-click="allocateSales()">Allocate Sales</button>
-
-          <button id="statsButton" class="btn btn-primary" ng-disabled="{{statsDisabled}}" ng-click="generateStats()">Generate Summary Stats</button>
-
-          <button id="statsButton" class="btn btn-primary" ng-init="resetDisabled = true" ng-disabled="{{resetDisabled}}" ng-click="resetData()">Reset Data</button> -->
-
-        <div layout="row">
-          <div class="eachButton" flex="33">
+      </div>
+      <div>
+        <div class="eachButton" flex="10">
+          <form>
+              <md-radio-group ng-model="allocationType">
+              <md-radio-button value="FIFO" class="md-primary">FIFO</md-radio-button>
+              <md-radio-button value="LIFO">LIFO</md-radio-button>
+            </md-radio-group>
+          </form>
+        </div>
+          <div class="eachButton" flex="30">
             <md-button class="md-raised md-primary" ng-disabled="allocateButton" required ng-init="allocateButton=true" ng-click="allocateSales()">Allocate Sales</md-button>
             <md-checkbox aria-label="toggle" ng-click="allocateButton=!allocateButton">enable</md-checkbox>
           </div>
-          <div class="eachButton" flex="33">
+          <div class="eachButton" flex="30">
             <md-button class="md-raised md-primary" ng-disabled="statsButton" required ng-init="statsButton=true" ng-click="generateStats()">Generate Stats</md-button>
             <md-checkbox aria-label="toggle" ng-click="statsButton=!statsButton">enable</md-checkbox>
           </div>
-          <div class="eachButton" flex="33">
+          <div class="eachButton" flex="30">
             <md-button class="md-raised md-primary" ng-disabled="resetButton" required ng-init="resetButton=true" ng-click="resetData()">Reset Data</md-button>
             <md-checkbox aria-label="toggle" ng-click="resetButton=!resetButton">enable</md-checkbox>
           </div>
+
+        <br><br><br>
+
+        <div ng-show="!allocateButton || !statsButton || !resetButton">
+          <h4>{{progressBarUpdate}}% Complete</h4>
+          <md-progress-linear md-mode="determinate" value="{{progressBarUpdate}}" ></md-progress-linear>
         </div>
-    
+      </div>
 
-    <!--       <md-checkbox ng-model="data.cb1" aria-label="Checkbox 1">
-          Checkbox 1: {{ data.cb1 }}
-        </md-checkbox> -->
-<!-- 
-          <md-button id="allocateButton" class="md-raised md-primary" ng-click="allocateSales(); showNextPanel(currentPanel)">Allocate Sales</md-button>
 
-          <md-button id="statsButton" class="md-raised md-primary" ng-click="generateStats(); showNextPanel(currentPanel)">Generate Summary Stats</md-button>
-
-          <md-button id="resetButton" class="md-raised md-primary" ng-disabled="{{resetDisabled}}" ng-click="resetAllocations()">Reset Data</md-button> -->
  
 
-<!--           <md-content class="md-padding tradeData">
-          <md-tabs md-dynamic-height md-border-bottom>
-          <md-tab ng-repeat="account in accounts"  label="{{account}}">
-          <md-content class="md-padding">
-          <table class="table table-striped table-condensed table-responsive disable-text-selection">
-            <tbody class="time-input tradeData">
-              <tr>
-                <td><b>Trade Date</b></td>
-                <td><b>Transaction Type</b></td>
-                <td><b>Currency</b></td>
-                <td><b>Quantity</b></td>
-                <td><b>Price Per Share</b></td>
-              </tr>
-              <tr ng-repeat="trade in allTrades | filter: { account: account }">
-                <td>{{trade.tradeDate}}</td>
-                <td>{{trade.transactionType}}</td>
-                <td>{{trade.currency}}</td>
-                <td>{{trade.quantity}}</td>
-                <td>{{trade.pricePerShare}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </md-content>
-      </md-tab>
-      </md-tabs>
-      </md-content> -->
+<!--  <md-content class="md-padding tradeData">
+      <md-tabs md-dynamic-height md-border-bottom>
+      <md-tab ng-repeat="account in accounts"  label="{{account}}">
+      <md-content class="md-padding">
+      <table class="table table-striped table-condensed table-responsive disable-text-selection">
+        <tbody class="time-input tradeData">
+          <tr>
+            <td><b>Trade Date</b></td>
+            <td><b>Transaction Type</b></td>
+            <td><b>Currency</b></td>
+            <td><b>Quantity</b></td>
+            <td><b>Price Per Share</b></td>
+          </tr>
+          <tr ng-repeat="trade in allTrades | filter: { account: account }">
+            <td>{{trade.tradeDate}}</td>
+            <td>{{trade.transactionType}}</td>
+            <td>{{trade.currency}}</td>
+            <td>{{trade.quantity}}</td>
+            <td>{{trade.pricePerShare}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </md-content>
+  </md-tab>
+  </md-tabs>
+  </md-content> -->
 
-      </div>
   </div>
 
 
-      <div ng-show="currentPanel===1" layout="column" flex>
+
+
+
+
+  <div ng-show="currentPanel===1" layout="column" flex>
 
         <section layout="row" layout-sm="column" layout-align="left center">
           <md-button class="md-raised" ng-click="showPrevPanel(currentPanel)">Back</md-button>
@@ -195,7 +194,11 @@
             </tbody>
           </table><br><br>
         </div>
-        </div>
+  </div>
+
+
+
+
       </div>
 
 

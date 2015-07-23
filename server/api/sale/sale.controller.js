@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
+var Socket = "THIS IS SOCKET AS A STRING"
 var Sale = require('./sale.model');
 var Buy = require('../buy/buy.model');
 var Dura = require('../dura/dura.model');
@@ -18,7 +19,7 @@ exports.index = function(req, res) {
 };
 
 
-function allocateSale_FIFO(currentSale, buysArray, classEndDate){
+function allocateSale(currentSale, buysArray, classEndDate){
 
   var updatedBuysArray = [], allocatableSales = currentSale.allocatables;
 
@@ -272,10 +273,16 @@ exports.generateStats = function(req, res){
 
   Promise.all(asyncDataArray)
   .then(function(returnedDataArray){
+    var statsCount = 0;
     var totals = returnedDataArray[0];
     var buys = returnedDataArray[1];
+    statsCount += totals.length + buys.length;
+    Socket.emit('statsCount_total', statsCount);
+
 
     for (var i = 0, max = buys.length; i < max; i++){
+      statsCount--;
+      Socket.emit('statsCount_update', statsCount);
       var finalTotals = finalTotalsObject[buys[i].account];
       var buy = buys[i];
       finalTotals.buys_class += buy.quantityAdjusted;
@@ -283,6 +290,8 @@ exports.generateStats = function(req, res){
     }
 
     for (var i = 0, max = totals.length;  i < max; i++){
+      statsCount--;
+      Socket.emit('statsCount_update', statsCount);
       var finalTotals = finalTotalsObject[totals[i].account];
       var total = totals[i];        
         finalTotals.sales_class += total.sales_class;
@@ -293,7 +302,8 @@ exports.generateStats = function(req, res){
         finalTotals.proceeds_90DayAllocated += total.proceeds_90DayAllocated;
       }
 
-      console.log("this is the finalTotalsObject: ", finalTotalsObject)
+      return res.json(finalTotalsObject);
+      
 
   })
   .catch(function (err) {
@@ -308,95 +318,98 @@ exports.resetAllocations = function(req, res){
   Buy.find({})
   .execAsync()
   .then(function(buys){
+    var buysCount = buys.length;
+    Socket.emit('resetBuysCount_total', buysCount);
     return buys.forEach(function(elem){
-      if(elem.buyType === "NEWBUY"){
-        Buy.removeAsync({_id: elem._id});
-      } else {
-      Buy.updateAsync({ _id: elem._id }, { $set: { allocatables: elem.quantity, quantityAdjusted: elem.quantity }})
-    }   
-    });
+        if(elem.buyType === "NEWBUY"){
+          Buy.removeAsync({_id: elem._id});
+        } else {
+        Buy.updateAsync({ _id: elem._id }, { $set: { allocatables: elem.quantity, quantityAdjusted: elem.quantity }})
+      }
+      buysCount--;
+      Socket.emit('resetBuysCount_update', buysCount)   
+      });
   })
   .then(function(){
-    console.log("BUY ALLOCATIONS RESET");
+    console.log("buys reset")
+  })
+  .then(function(){
     return Sale.find({})
-          .execAsync()
-          .then(function(sales){
-            return sales.forEach(function(elem){
-              Sale.updateAsync({ _id: elem._id }, { $set: { allocatables: elem.quantity }});          
-            })          
-          })
-  })
-  .then(function(){
-    console.log("SALE ALLOCATIONS RESET")
-  }
-  )
-  .catch(function (err) {
-   console.error(err); 
-  })
-  .done();
-
-  BegHolding.find({})
-  .execAsync()
-  .then(function(begholdings){
-    return begholdings.forEach(function(elem){
-      BegHolding.updateAsync({ _id: elem._id }, { $set: { allocatables: elem.quantity, quantityAdjusted: elem.quantity }})
+    .execAsync()
+    .then(function(sales){
+      var salesCount = sales.length;
+      Socket.emit('resetSalesCount_total', salesCount);
+      return sales.forEach(function(elem){
+          Sale.updateAsync({ _id: elem._id }, { $set: { allocatables: elem.quantity }});
+          salesCount--;
+          Socket.emit('resetSalesCount_total', salesCount);
+        })
     })
   })
   .then(function(){
-    console.log("BEGHOLDINGS ALLOCATIONS RESET");
+    return BegHolding.find({})
+    .execAsync()
+    .then(function(begHoldings){
+      var begHoldingsCount = begHoldings.length;
+      Socket.emit('resetbegHoldingsCount_total', begHoldingsCount);
+      return begHoldings.forEach(function(elem){
+          BegHolding.updateAsync({ _id: elem._id }, { $set: { allocatables: elem.quantity, quantityAdjusted: elem.quantity }});
+          begHoldingsCount--;
+          Socket.emit('resetbegHoldingsCount_total', begHoldingsCount);
+        })
+    })
   })
-  .catch(function (err) {
-   console.error(err); 
-  })
-  .done();
-
-  Dura.removeAsync({})
   .then(function(){
-    console.log("DURA COLLECTION CLEARED")
+    Dura.removeAsync({});
+  })
+  .then(function(){
+    Total.removeAsync({});
+  })
+  .then(function(){
+    Socket.emit('reset_complete')
+    return res.end();
   })
   .catch(function (err) {
    console.error(err); 
  })
   .done();
 
-  Total.removeAsync({})
-  .then(function(){
-    console.log("TOTAL COLLECTION CLEARED")
-  })
-  .catch(function (err) {
-   console.error(err); 
- })
-  .done();
 
+
+
+}
+
+exports.injectSocket = function(socket){
+  Socket = socket;
 }
 
 exports.allocateSales = function(req, res){
 
   //req.body for production
-  var classEndDate = "2014,11,14";
-  var allocationType = "FIFO"
-  var saleCount = Sale.find({}).count();
+  var classEndDate = req.params.classEndDate;
+  var allocationType = req.params.allocationType;
 
+  var saleCount;
 
   Sale.find({})
   .count()
   .execAsync()
   .then(function(count){
 
-    var saleCount = count;
+    Socket.emit('saleCount_total', count);
+    saleCount = count;
     var stream = Sale.find(
                             {},
                             'tradeDate allocatables account transferAccount quantity pricePerShare transactionType',
                             { tradeDate: 1, allocatables: 1, _id: 0 }
-                            )
-                  .sort( { tradeDate: 1, allocatables: 1 } )
-                  .stream();
+                          )
+                      .sort( { tradeDate: 1, allocatables: 1 } )
+                      .stream();
 
     stream.on('data', function(currentSale) {
 
       saleCount--;
-
-      console.log("this is the sale count: ", saleCount)
+      Socket.emit('saleCount_update', saleCount);
 
       stream.pause();
 
@@ -411,7 +424,7 @@ exports.allocateSales = function(req, res){
           buysArray = buysArray.reverse();
         }
 
-        return allocateSale_FIFO(currentSale, buysArray, classEndDate);
+        return allocateSale(currentSale, buysArray, classEndDate);
       })
       .then(function(updatedBuysArray){
         stream.resume();
@@ -425,6 +438,7 @@ exports.allocateSales = function(req, res){
       return handleError(res,err);
     })
     stream.on('close', function () {
+      Socket.emit('saleCount_complete')
       return res.end();
     })
   })

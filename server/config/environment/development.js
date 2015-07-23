@@ -8,5 +8,5 @@ module.exports = {
     uri: 'mongodb://localhost/classdamages-dev'
   },
 
-  seedDB: true
+  seedDB: false
 };
