@@ -1,11 +1,12 @@
 'use strict';
 
 var _ = require('lodash');
-var Socket = "THIS IS SOCKET AS A STRING"
+var Socket;
 var Sale = require('./sale.model');
 var Buy = require('../buy/buy.model');
 var Dura = require('../dura/dura.model');
 var Total = require('../total/total.model');
+var Result = require('../result/result.model');
 var BegHolding = require('../begholding/begholding.model');
 var Promise = require("bluebird");
 Promise.promisifyAll(require("mongoose"));
@@ -25,7 +26,6 @@ function allocateSale(currentSale, buysArray, classEndDate){
 
   if(currentSale.tradeDate <= classEndDate && currentSale.transactionType === "SELL"){
     var newTotal = new Total({
-      status: '',
       account: currentSale.account,
       buys_class: 0,
       expenditures_class: 0,
@@ -108,7 +108,6 @@ function allocateSale(currentSale, buysArray, classEndDate){
         //update in-class and 90-day totals by the remaining amount of the buy's allocatables
         if(currentSale.tradeDate <= classEndDate){
           var newTotal = new Total({
-            status: '',
             account: currentSale.account,
             buys_class: 0,
             expenditures_class: 0,
@@ -122,7 +121,6 @@ function allocateSale(currentSale, buysArray, classEndDate){
           updatedBuysArray.push(newTotal.saveAsync());
         } else {
           var newTotal = new Total({
-            status: '',
             account: currentSale.account,
             buys_class: 0,
             proceeds_class: 0,
@@ -202,7 +200,6 @@ function allocateSale(currentSale, buysArray, classEndDate){
           //update in-class and 90-day totals by the remaining amount of the buy's allocatables
         if(currentSale.tradeDate <= classEndDate){
           var newTotal = new Total({
-            status: '',
             account: currentSale.account,
             buys_class: 0,
             expenditures_class: 0,
@@ -216,7 +213,6 @@ function allocateSale(currentSale, buysArray, classEndDate){
           updatedBuysArray.push(newTotal.saveAsync());
         } else {
           var newTotal = new Total({
-            status: '',
             account: currentSale.account,
             buys_class: 0,
             expenditures_class: 0,
@@ -236,23 +232,38 @@ function allocateSale(currentSale, buysArray, classEndDate){
       updatedBuysArray.push(Sale.findByIdAndUpdateAsync(currentSale._id, { $set: { allocatables: 0 }}));
     }
   } 
-
-
   return Promise.all(updatedBuysArray);
 
 }
 
-exports.generateStats = function(req, res){
+exports.generateResults = function(req, res){
 
     //req.body for production
-  var classEndDate = "2014,11,14";
-  var accounts = ['Account 1', 'Account 2'] //get through front-end req query
+  var classEndDate = req.params.classEndDate;
+  var accounts; //get through front-end req query
   var asyncDataArray = [];
-  var finalTotalsObject = {};
+  var asyncResultsArray = [];
+  var finalResultsObject = {};
+
+
+  asyncDataArray.push(Total.find({}).execAsync());
+  asyncDataArray.push(Buy.find({}, 'tradeDate account quantityAdjusted pricePerShare').where('tradeDate').lte(classEndDate).execAsync());
+  asyncDataArray.push(BegHolding.find({}).execAsync());
+  asyncDataArray.push(BegHolding.distinct("account").execAsync());
+
+  Promise.all(asyncDataArray)
+  .then(function(returnedDataArray){
+    var resultsCount = 0;
+    var totals = returnedDataArray[0];
+    var buys = returnedDataArray[1];
+    var begHoldings = returnedDataArray[2];
+    accounts = returnedDataArray[3];
+    resultsCount += totals.length + buys.length + begHoldings.length;
+    Socket.emit('resultsCount_total', resultsCount);
 
   for (var i = 0, max = accounts.length; i < max; i++){
-    var newTotal = new Total({
-      status: 'final',
+    var newResult = new Result({
+      begHoldings: 0,
       account: accounts[i],
       buys_class: 0,
       expenditures_class: 0,
@@ -261,50 +272,57 @@ exports.generateStats = function(req, res){
       sales_classAllocated: 0,
       proceeds_classAllocated: 0,
       sales_90DayAllocated: 0,
-      proceeds_90DayAllocated: 0
+      proceeds_90DayAllocated: 0,
+      sharesRetained: 0,
+      valueOfRetainedShares: 0,
+      damages_gain: 0,
+      avgClosingPrice_90Day: 0
     });
-
-    finalTotalsObject[accounts[i]] = newTotal;
-
+    finalResultsObject[accounts[i]] = newResult;
   }
-
-  asyncDataArray.push(Total.find({}).execAsync());
-  asyncDataArray.push(Buy.find({}, 'tradeDate account quantityAdjusted pricePerShare').where('tradeDate').lte(classEndDate).execAsync());
-
-  Promise.all(asyncDataArray)
-  .then(function(returnedDataArray){
-    var statsCount = 0;
-    var totals = returnedDataArray[0];
-    var buys = returnedDataArray[1];
-    statsCount += totals.length + buys.length;
-    Socket.emit('statsCount_total', statsCount);
 
 
     for (var i = 0, max = buys.length; i < max; i++){
-      statsCount--;
-      Socket.emit('statsCount_update', statsCount);
-      var finalTotals = finalTotalsObject[buys[i].account];
+      resultsCount--;
+      Socket.emit('resultsCount_update', resultsCount);
+      var finalResults = finalResultsObject[buys[i].account];
       var buy = buys[i];
-      finalTotals.buys_class += buy.quantityAdjusted;
-      finalTotals.expenditures_class += buy.quantityAdjusted*buy.pricePerShare;
+      finalResults.buys_class += buy.quantityAdjusted;
+      finalResults.expenditures_class += buy.quantityAdjusted*buy.pricePerShare;
     }
 
     for (var i = 0, max = totals.length;  i < max; i++){
-      statsCount--;
-      Socket.emit('statsCount_update', statsCount);
-      var finalTotals = finalTotalsObject[totals[i].account];
+      resultsCount--;
+      Socket.emit('resultsCount_update', resultsCount);
+      var finalResults = finalResultsObject[totals[i].account];
       var total = totals[i];        
-        finalTotals.sales_class += total.sales_class;
-        finalTotals.proceeds_class += total.proceeds_class;
-        finalTotals.sales_classAllocated += total.sales_classAllocated;
-        finalTotals.proceeds_classAllocated += total.proceeds_classAllocated;
-        finalTotals.sales_90DayAllocated += total.sales_90DayAllocated;
-        finalTotals.proceeds_90DayAllocated += total.proceeds_90DayAllocated;
+      finalResults.sales_class += total.sales_class;
+      finalResults.proceeds_class += total.proceeds_class;
+      finalResults.sales_classAllocated += total.sales_classAllocated;
+      finalResults.proceeds_classAllocated += total.proceeds_classAllocated;
+      finalResults.sales_90DayAllocated += total.sales_90DayAllocated;
+      finalResults.proceeds_90DayAllocated += total.proceeds_90DayAllocated;
+    }
+
+    for (var i = 0, max = begHoldings.length; i < max; i++){
+      resultsCount--;
+      Socket.emit('resultsCount_update', resultsCount);
+      var finalResults = finalResultsObject[begHoldings[i].account];
+      var begHolding = begHoldings[i];
+      finalResults.begHoldings += begHolding.quantityAdjusted;
+    }
+
+    for (var key in finalResultsObject){
+      if (finalResultsObject.hasOwnProperty(key)){
+        // var newResult = finalResultsObject[key];
+        asyncResultsArray.push(finalResultsObject[key].saveAsync());
       }
-
-      return res.json(finalTotalsObject);
-      
-
+    }
+      return Promise.all(asyncResultsArray);
+  })
+  .then(function(res){
+    console.log("this is res after results saved: ", res)
+      return res.end();
   })
   .catch(function (err) {
    console.error(err); 
@@ -319,6 +337,8 @@ exports.resetAllocations = function(req, res){
   .execAsync()
   .then(function(buys){
     var buysCount = buys.length;
+    var startTime = Date.now();
+    Socket.emit('process_start', startTime)
     Socket.emit('resetBuysCount_total', buysCount);
     return buys.forEach(function(elem){
         if(elem.buyType === "NEWBUY"){
@@ -366,15 +386,14 @@ exports.resetAllocations = function(req, res){
     Total.removeAsync({});
   })
   .then(function(){
-    Socket.emit('reset_complete')
+    var endTime = Date.now();
+    Socket.emit('process_complete', endTime)
     return res.end();
   })
   .catch(function (err) {
    console.error(err); 
  })
   .done();
-
-
 
 
 }
@@ -385,7 +404,6 @@ exports.injectSocket = function(socket){
 
 exports.allocateSales = function(req, res){
 
-  //req.body for production
   var classEndDate = req.params.classEndDate;
   var allocationType = req.params.allocationType;
 
@@ -396,15 +414,18 @@ exports.allocateSales = function(req, res){
   .execAsync()
   .then(function(count){
 
+    var startTime = Date.now();
+    Socket.emit('process_start', startTime)
+
     Socket.emit('saleCount_total', count);
     saleCount = count;
     var stream = Sale.find(
-                            {},
-                            'tradeDate allocatables account transferAccount quantity pricePerShare transactionType',
-                            { tradeDate: 1, allocatables: 1, _id: 0 }
-                          )
-                      .sort( { tradeDate: 1, allocatables: 1 } )
-                      .stream();
+          {},
+          'tradeDate allocatables account transferAccount quantity pricePerShare transactionType',
+          { tradeDate: 1, allocatables: 1, _id: 0 }
+        )
+    .sort( { tradeDate: 1, allocatables: 1 } )
+    .stream();
 
     stream.on('data', function(currentSale) {
 
@@ -438,7 +459,8 @@ exports.allocateSales = function(req, res){
       return handleError(res,err);
     })
     stream.on('close', function () {
-      Socket.emit('saleCount_complete')
+      var endTime = Date.now();
+      Socket.emit('process_complete', endTime)
       return res.end();
     })
   })

@@ -3,7 +3,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-var TotalSchema = new Schema({
+var ResultSchema = new Schema({
     begHoldings: Number,
     account: String,
     buys_class: Number,
@@ -12,8 +12,12 @@ var TotalSchema = new Schema({
     proceeds_class: Number,
     sales_classAllocated: Number,
     proceeds_classAllocated: Number,
-    sales_90DayAllocated: Number, 
-    proceeds_90DayAllocated: Number //need avg prices from elaine
-  });
+    sales_90DayAllocated: Number,
+    proceeds_90DayAllocated: Number,
+    sharesRetained: Number,
+    valueOfRetainedShares: Number,
+    damages_gain: Number,
+    avgClosingPrice_90Day: Number
+});
 
-module.exports = mongoose.model('Total', TotalSchema);
+module.exports = mongoose.model('Result', ResultSchema);

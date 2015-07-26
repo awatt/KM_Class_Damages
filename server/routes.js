@@ -9,14 +9,14 @@ var errors = require('./components/errors');
 module.exports = function(app) {
 
   // Insert routes below
-  app.use('/api/sales2s', require('./api/sales2'));
+  app.use('/api/results', require('./api/result'));
   app.use('/api/totals', require('./api/total'));
   app.use('/api/duras', require('./api/dura'));
   app.use('/api/endholdings', require('./api/endholding'));
   app.use('/api/begholdings', require('./api/begholding'));
   app.use('/api/buys', require('./api/buy'));
   app.use('/api/sales', require('./api/sale'));
-  app.use('/api/things', require('./api/thing'));
+  // app.use('/api/things', require('./api/thing'));
   app.use('/api/users', require('./api/user'));
 
   app.use('/auth', require('./auth'));

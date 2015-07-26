@@ -9,7 +9,7 @@
         </div>
       </div>
       <div>
-        <div class="eachButton" flex="10">
+        <div class="eachButton" flex="8">
           <form>
               <md-radio-group ng-model="allocationType">
               <md-radio-button value="FIFO" class="md-primary">FIFO</md-radio-button>
@@ -17,15 +17,19 @@
             </md-radio-group>
           </form>
         </div>
-          <div class="eachButton" flex="30">
+          <div class="eachButton" flex="23">
             <md-button class="md-raised md-primary" ng-disabled="allocateButton" required ng-init="allocateButton=true" ng-click="allocateSales()">Allocate Sales</md-button>
             <md-checkbox aria-label="toggle" ng-click="allocateButton=!allocateButton">enable</md-checkbox>
           </div>
-          <div class="eachButton" flex="30">
-            <md-button class="md-raised md-primary" ng-disabled="statsButton" required ng-init="statsButton=true" ng-click="generateStats()">Generate Stats</md-button>
+          <div class="eachButton" flex="23">
+            <md-button class="md-raised md-primary" ng-disabled="statsButton" required ng-init="statsButton=true" ng-click="generateResults()">Generate Stats</md-button>
             <md-checkbox aria-label="toggle" ng-click="statsButton=!statsButton">enable</md-checkbox>
           </div>
-          <div class="eachButton" flex="30">
+          <div class="eachButton" flex="23">
+            <md-button class="md-raised md-primary" ng-disabled="displayButton" required ng-init="displayButton=true" ng-click="displayResults()">Display Results</md-button>
+            <md-checkbox aria-label="toggle" ng-click="displayButton=!displayButton">enable</md-checkbox>
+          </div>
+          <div class="eachButton" flex="23">
             <md-button class="md-raised md-primary" ng-disabled="resetButton" required ng-init="resetButton=true" ng-click="resetData()">Reset Data</md-button>
             <md-checkbox aria-label="toggle" ng-click="resetButton=!resetButton">enable</md-checkbox>
           </div>
@@ -38,7 +42,10 @@
         </div>
       </div>
 
-
+<div><br><br>
+<h3>{{progressBarDuration}}</h3>
+<h3>{{stats}}</h3>
+</div>
  
 
 <!--  <md-content class="md-padding tradeData">
@@ -114,26 +121,26 @@
               </tr>
               <tr ng-repeat="(key, value) in statsByAccountFIFO">
                 <td class="noWrap tableHeadings"><b>{{key}}</b></td>
-                <td class="cellData">{{value.preClassHoldings | number}}</td>
-                <td class="cellData">{{value.classPeriodPurchases | number}}</td>
-                <td class="cellData">{{value.expenditures | number:2}}</td>
-                <td class="cellData">{{value.classPeriodSales | number}}</td>
-                <td class="cellData">{{value.classPeriodProceeds | number:2}}</td>
-                <td class="cellData">{{value.recognizedSales | number}}</td>
-                <td class="cellData">{{value.recognizedProceeds | number:2}}</td>
+                <td class="cellData">{{value.begHoldings | number}}</td>
+                <td class="cellData">{{value.buys_class | number}}</td>
+                <td class="cellData">{{value.expenditures_class | number:2}}</td>
+                <td class="cellData">{{value.sales_class | number}}</td>
+                <td class="cellData">{{value.proceeds_class | number:2}}</td>
+                <td class="cellData">{{value.sales_classAllocated | number}}</td>
+                <td class="cellData">{{value.proceeds_classAllocated | number:2}}</td>
                 <td class="cellData">{{value.sharesRetained | number}}</td>
                 <td class="cellData">{{value.valueOfRetainedShares | number:2}}</td>
                 <td class="cellData">{{value.damages_gain | number:2}}</td>
               </tr>
               <tr>
                 <td class="noWrap tableHeadings"><b>Totals:</b></td>
-                <td class="cellData"><b>{{totalsFIFO.preClassHoldings | number}}</b></td>
-                <td class="cellData"><b>{{totalsFIFO.classPeriodPurchases | number}}</b></td>
-                <td class="cellData"><b>{{totalsFIFO.expenditures | number:2}}</b></td>
-                <td class="cellData"><b>{{totalsFIFO.classPeriodSales | number}}</b></td>
-                <td class="cellData"><b>{{totalsFIFO.classPeriodProceeds | number:2}}</b></td>
-                <td class="cellData"><b>{{totalsFIFO.recognizedSales | number}}</b></td>
-                <td class="cellData"><b>{{totalsFIFO.recognizedProceeds | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.begHoldings | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.buys_class | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.expenditures_class | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.sales_class | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.proceeds_class | number:2}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.sales_classAllocated | number}}</b></td>
+                <td class="cellData"><b>{{totalsFIFO.proceeds_classAllocated | number:2}}</b></td>
                 <td class="cellData"><b>{{totalsFIFO.sharesRetained | number}}</b></td>
                 <td class="cellData"><b>{{totalsFIFO.valueOfRetainedShares | number:2}}</b></td>
                 <td class="cellData"><b>{{totalsFIFO.damages_gain | number:2}}</b></td>
@@ -167,7 +174,7 @@
               </tr>
               <tr ng-repeat="(key, value) in statsByAccountLIFO">
                 <td class="noWrap tableHeadings"><b>{{key}}</b></td>
-                <td class="cellData">{{value.preClassHoldings | number}}</td>
+                <td class="cellData">{{value.begHoldings | number}}</td>
                 <td class="cellData">{{value.classPeriodPurchases | number}}</td>
                 <td class="cellData">{{value.expenditures | number:2}}</td>
                 <td class="cellData">{{value.classPeriodSales | number}}</td>
@@ -180,7 +187,7 @@
               </tr>
               <tr>
                 <td class="noWrap tableHeadings"><b>Totals:</b></td>
-                <td class="cellData"><b>{{totalsLIFO.preClassHoldings | number}}</b></td>
+                <td class="cellData"><b>{{totalsLIFO.begHoldings | number}}</b></td>
                 <td class="cellData"><b>{{totalsLIFO.classPeriodPurchases | number}}</b></td>
                 <td class="cellData"><b>{{totalsLIFO.expenditures | number:2}}</b></td>
                 <td class="cellData"><b>{{totalsLIFO.classPeriodSales | number}}</b></td>
