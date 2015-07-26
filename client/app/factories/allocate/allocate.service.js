@@ -11,11 +11,11 @@ angular.module('classdamagesApp')
       }
     });
 
-     allocate.allocateSales = function(allocationType,classEndDate){
-      allocate.get({allocationType: allocationType, classEndDate: classEndDate}, function(){
-        console.log("completed allocation of sales");
-      });
-     };
+     // allocate.allocateSales = function(allocationType,classEndDate){
+     //  allocate.get({allocationType: allocationType, classEndDate: classEndDate}, function(){
+     //    console.log("completed allocation of sales");
+     //  });
+     // };
 
     // Public API here
     return allocate;

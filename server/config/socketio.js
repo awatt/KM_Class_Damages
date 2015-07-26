@@ -19,8 +19,8 @@ function onConnect(socket) {
 
   // Insert sockets below
   require('../api/result/result.socket').register(socket);
-  require('../api/stat/stat.socket').register(socket);
-  require('../api/thing/thing.socket').register(socket);
+  // require('../api/stat/stat.socket').register(socket);
+  // require('../api/thing/thing.socket').register(socket);
   require('../api/sale/sale.controller').injectSocket(socket);
 }
 

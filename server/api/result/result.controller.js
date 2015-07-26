@@ -3,9 +3,32 @@
 var _ = require('lodash');
 var Result = require('./result.model');
 
+
+exports.summaryResults = function(req,res){
+  var resultsFIFO;
+  var resultsLIFO;
+
+  Result.find({allocationType: 'FIFO'})
+  .execAsync()
+  .then(function(res){
+    resultsFIFO = res;
+    return Result.find({allocationType: 'LIFO'}).execAsync()
+  })
+  .then(function(res){
+    resultsLIFO = res;
+  })
+  .then(function(){
+    var finalResults = Result.sumResults(resultsFIFO, resultsLIFO);
+    console.log("this is finalResults in controller: ", finalResults)
+    return res.json(200, finalResults);
+  })
+}
+
+
 // Get list of results
 exports.index = function(req, res) {
   Result.find(function (err, results) {
+    console.log("GOT TO BACK END - these are results: ", results)
     if(err) { return handleError(res, err); }
     return res.json(200, results);
   });

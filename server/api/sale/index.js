@@ -8,7 +8,7 @@ var router = express.Router();
 router.get('/', controller.index);
 router.get('/byDate/:allocationType/:classEndDate', controller.allocateSales);
 router.get('/reset', controller.resetAllocations);
-router.get('/stats/:classEndDate', controller.generateResults);
+router.get('/results/:allocationType/:classEndDate', controller.generateResults);
 router.get('/:id', controller.show);
 router.post('/', controller.create);
 router.put('/:id', controller.update);

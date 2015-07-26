@@ -238,7 +238,7 @@ function allocateSale(currentSale, buysArray, classEndDate){
 
 exports.generateResults = function(req, res){
 
-    //req.body for production
+  var allocationType = req.params.allocationType;
   var classEndDate = req.params.classEndDate;
   var accounts; //get through front-end req query
   var asyncDataArray = [];
@@ -263,6 +263,7 @@ exports.generateResults = function(req, res){
 
   for (var i = 0, max = accounts.length; i < max; i++){
     var newResult = new Result({
+      allocationType: allocationType,
       begHoldings: 0,
       account: accounts[i],
       buys_class: 0,
@@ -280,7 +281,6 @@ exports.generateResults = function(req, res){
     });
     finalResultsObject[accounts[i]] = newResult;
   }
-
 
     for (var i = 0, max = buys.length; i < max; i++){
       resultsCount--;
@@ -320,8 +320,7 @@ exports.generateResults = function(req, res){
     }
       return Promise.all(asyncResultsArray);
   })
-  .then(function(res){
-    console.log("this is res after results saved: ", res)
+  .then(function(savedResultsArray){
       return res.end();
   })
   .catch(function (err) {
@@ -384,6 +383,9 @@ exports.resetAllocations = function(req, res){
   })
   .then(function(){
     Total.removeAsync({});
+  })
+  .then(function(){
+    Result.removeAsync({});
   })
   .then(function(){
     var endTime = Date.now();

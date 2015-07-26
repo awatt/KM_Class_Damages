@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('classdamagesApp')
-.controller('MainCtrl', function ($scope, $http, socket, $mdToast, allocate, reset, stats) {
+.controller('MainCtrl', function ($scope, $http, socket, $mdToast, allocate, reset, results) {
 
   $scope.allocationType;
   $scope.progressBarBase = 0;
@@ -9,10 +9,10 @@ angular.module('classdamagesApp')
   $scope.progressBarStart;
   $scope.progressBarDuration;
   $scope.classEndDate = '2014,11,14';
-  $scope.statsByAccountFIFO;
-  $scope.totalsFIFO = {};
-  $scope.statsByAccountLIFO;
-  $scope.totalsLIFO = {};
+  $scope.resultsByAccountFIFO;
+  $scope.totalsFIFO;
+  $scope.resultsByAccountLIFO;
+  $scope.totalsLIFO;
   $scope.avgClosingPrice90Day = 7.52; //user input at client interface
 
 
@@ -33,15 +33,42 @@ angular.module('classdamagesApp')
   };
 
   $scope.allocateSales = function(){
-    allocate.allocateSales($scope.allocationType, $scope.classEndDate, function(res){
-    });
+    allocate.get({allocationType: $scope.allocationType, classEndDate: $scope.classEndDate}).$promise
+    .then(function(res){
+      console.log("this is res of allocate.get: ", res);
+      results.allocationResults.get({allocationType: $scope.allocationType, classEndDate: $scope.classEndDate}).$promise
+      .then(function(res){
+        console.log("this is res of results.get: ", res);
+      })
+    })
   };
 
+  $scope.resetData = function(){
+    reset.get().$promise
+    .then(function(res){
+      console.log("this is the res of reset.get", res);
+    })
+  };
 
-$scope.generateResults = function(){
-  stats.get({classEndDate: $scope.classEndDate})
-  .$promise.then(function(stats){
-    console.log("this is stats after then: ", stats)
+  $scope.displayResults = function(){
+    results.summaryResults.get().$promise
+    .then(function(res){
+      $scope.resultsByAccountFIFO = res.resultsByAccountFIFO;
+      console.log("this is statsByAccountFIFO: ", $scope.resultsByAccountFIFO)
+      $scope.totalsFIFO = res.totalsFIFO;
+      console.log("this is totalsFIFO: ", $scope.totalsFIFO)
+      $scope.resultsByAccountLIFO = res.resultsByAccountLIFO;
+      console.log("this is statsByAccountLIFO: ", $scope.resultsByAccountLIFO)
+      $scope.totalsLIFO = res.totalsLIFO;
+      console.log("this is totalsLIFO: ", $scope.totalsLIFO)
+    })
+    $scope.showNextPanel($scope.currentPanel);
+  };
+
+// $scope.generesults = function(){
+//   stats.get({classEndDate: $scope.classEndDate})
+//   .$promise.then(function(stats){
+//     console.log("this is stats after then: ", stats)
     
 
     // for (var key in stats){
@@ -73,22 +100,14 @@ $scope.generateResults = function(){
     //   $scope.statsByAccountLIFO = stats;
     // }
 
-  });
-}
 
-  $scope.displayResults = function(){
-    $scope.showNextPanel($scope.currentPanel);
-  };
+ 
 
-  $scope.resetData = function(){
-    reset.get(function(res){
-    });
-  };
+
 
   // Progress Bar Logic
 
   var openToast =  function(minutes, seconds) {
-    console.log("this is progressBarUpdate after allocation: ", $scope.progressBarUpdate)
     $mdToast.show(
       $mdToast.simple()
         .content('Completed in ' + minutes + ' minutes ' + seconds + ' seconds')
@@ -117,12 +136,12 @@ $scope.generateResults = function(){
     openToast(minutes, seconds);
   });
 
-  socket.socket.on('statsCount_total', function(statsCount){
-    $scope.progressBarBase = statsCount;
+  socket.socket.on('resultsCount_total', function(resultsCount){
+    $scope.progressBarBase = resultsCount;
   });
 
-  socket.socket.on('statsCount_update', function(statsCount) {
-    $scope.progressBarUpdate = Math.floor(100*($scope.progressBarBase-statsCount)/$scope.progressBarBase);
+  socket.socket.on('resultsCount_update', function(resultsCount) {
+    $scope.progressBarUpdate = Math.floor(100*($scope.progressBarBase-resultsCount)/$scope.progressBarBase);
   });
 
   socket.socket.on('resetBuysCount_total', function(resetBuysCount){
