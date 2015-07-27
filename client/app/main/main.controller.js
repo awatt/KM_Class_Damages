@@ -6,8 +6,12 @@ angular.module('classdamagesApp')
   $scope.allocationType;
   $scope.progressBarBase = 0;
   $scope.progressBarUpdate = 0;
-  $scope.progressBarStart;
-  $scope.progressBarDuration;
+  $scope.progressBarStart = 0;
+  $scope.saleCountUpdate = 0;
+  $scope.progressTimeupdate = 0
+  $scope.progressBarEstimate = 0;
+  $scope.progressBarDuratio = 0;
+  $scope.avgTimePerSale = 0;
   $scope.classEndDate = '2014,11,14'; //user input
   $scope.resultsByAccountFIFO;
   $scope.totalsFIFO;
@@ -74,12 +78,20 @@ angular.module('classdamagesApp')
   });
 
   socket.socket.on('saleCount_update', function(saleCount) {
+    $scope.saleCountUpdate = saleCount;
     $scope.progressBarUpdate = Math.floor(100*($scope.progressBarBase-saleCount)/$scope.progressBarBase);
+    // $scope.$apply()
   });
 
   socket.socket.on('process_start', function(startTime){
     $scope.progressBarStart = startTime;
   });
+
+  socket.socket.on('process_update', function(updateTime){
+    $scope.progressTimeupdate = updateTime;
+    $scope.avgTimePerSale = Math.floor(($scope.progressTimeupdate - $scope.progressBarStart)/($scope.progressBarBase - $scope.saleCountUpdate));
+  $scope.progressBarEstimate = Math.floor($scope.avgTimePerSale*$scope.saleCountUpdate/1000);
+  })
 
   socket.socket.on('process_complete', function(endTime) {
     var secondsFloat = (endTime - $scope.progressBarStart)/1000;

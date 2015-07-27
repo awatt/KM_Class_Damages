@@ -5,7 +5,7 @@
   <div ng-show="currentPanel===0" layout="column" flex>
     <div layout="row">
         <div class="page-header" flex>
-          <h3 class="text-center">PETROLEO BRASILEIRO-SPON ADR</h3>
+          <h3 class="text-center">CITA JPM-USAA</h3>
         </div>
       </div>
       <div>
@@ -35,12 +35,14 @@
         <div ng-show="!allocateButton || !statsButton || !resetButton">
           <h4>{{progressBarUpdate}}% Complete</h4>
           <md-progress-linear md-mode="determinate" value="{{progressBarUpdate}}" ></md-progress-linear>
+          <h5>Number of Sales Allocated {{saleCountUpdate}} of {{progressBarBase}}</h5>
+          <h5>Average Time Per Sale Allocation: {{avgTimePerSale}} ms</h5>
+          <h5>Estimated Time Remaining to Complete Allocation: {{progressBarEstimate}} sec</h5>
         </div>
       </div>
 
 <div><br><br>
 <h3>{{progressBarDuration}}</h3>
-<h3>{{stats}}</h3>
 </div>
  
 

@@ -425,8 +425,9 @@ exports.allocateSales = function(req, res){
     .stream();
 
     stream.on('data', function(currentSale) {
-
+      var updateTime = Date.now();
       saleCount--;
+      Socket.emit('process_update', updateTime);
       Socket.emit('saleCount_update', saleCount);
 
       stream.pause();
