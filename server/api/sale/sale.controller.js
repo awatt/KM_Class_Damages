@@ -240,16 +240,17 @@ exports.generateResults = function(req, res){
 
   var allocationType = req.params.allocationType;
   var classEndDate = req.params.classEndDate;
+  var avgClosingPrice_90Day = req.params.avgClosingPrice_90Day;
   var accounts; //get through front-end req query
   var asyncDataArray = [];
   var asyncResultsArray = [];
   var finalResultsObject = {};
 
-
   asyncDataArray.push(Total.find({}).execAsync());
   asyncDataArray.push(Buy.find({}, 'tradeDate account quantityAdjusted pricePerShare').where('tradeDate').lte(classEndDate).execAsync());
   asyncDataArray.push(BegHolding.find({}).execAsync());
   asyncDataArray.push(BegHolding.distinct("account").execAsync());
+  asyncDataArray.push(Result.find({ allocationType: allocationType }).remove().execAsync());
 
   Promise.all(asyncDataArray)
   .then(function(returnedDataArray){
@@ -277,7 +278,7 @@ exports.generateResults = function(req, res){
       sharesRetained: 0,
       valueOfRetainedShares: 0,
       damages_gain: 0,
-      avgClosingPrice_90Day: 0
+      avgClosingPrice_90Day: avgClosingPrice_90Day
     });
     finalResultsObject[accounts[i]] = newResult;
   }
@@ -314,7 +315,6 @@ exports.generateResults = function(req, res){
 
     for (var key in finalResultsObject){
       if (finalResultsObject.hasOwnProperty(key)){
-        // var newResult = finalResultsObject[key];
         asyncResultsArray.push(finalResultsObject[key].saveAsync());
       }
     }
@@ -327,7 +327,6 @@ exports.generateResults = function(req, res){
    console.error(err); 
  })
   .done();
-
 }
 
 exports.resetAllocations = function(req, res){
@@ -385,9 +384,6 @@ exports.resetAllocations = function(req, res){
     Total.removeAsync({});
   })
   .then(function(){
-    Result.removeAsync({});
-  })
-  .then(function(){
     var endTime = Date.now();
     Socket.emit('process_complete', endTime)
     return res.end();
@@ -396,7 +392,6 @@ exports.resetAllocations = function(req, res){
    console.error(err); 
  })
   .done();
-
 
 }
 

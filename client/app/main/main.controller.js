@@ -8,12 +8,12 @@ angular.module('classdamagesApp')
   $scope.progressBarUpdate = 0;
   $scope.progressBarStart;
   $scope.progressBarDuration;
-  $scope.classEndDate = '2014,11,14';
+  $scope.classEndDate = '2014,11,14'; //user input
   $scope.resultsByAccountFIFO;
   $scope.totalsFIFO;
   $scope.resultsByAccountLIFO;
   $scope.totalsLIFO;
-  $scope.avgClosingPrice90Day = 7.52; //user input at client interface
+  $scope.avgClosingPrice_90Day = 7.52; //user input
 
 
   // progress.progress($scope.progressBarBase, $scope.progressBarUpdate, $scope.progressBarStart, $scope.progressBarDuration)
@@ -35,10 +35,8 @@ angular.module('classdamagesApp')
   $scope.allocateSales = function(){
     allocate.get({allocationType: $scope.allocationType, classEndDate: $scope.classEndDate}).$promise
     .then(function(res){
-      console.log("this is res of allocate.get: ", res);
-      results.allocationResults.get({allocationType: $scope.allocationType, classEndDate: $scope.classEndDate}).$promise
+      results.allocationResults.get({allocationType: $scope.allocationType, classEndDate: $scope.classEndDate, avgClosingPrice_90Day: $scope.avgClosingPrice_90Day}).$promise
       .then(function(res){
-        console.log("this is res of results.get: ", res);
       })
     })
   };
@@ -46,7 +44,6 @@ angular.module('classdamagesApp')
   $scope.resetData = function(){
     reset.get().$promise
     .then(function(res){
-      console.log("this is the res of reset.get", res);
     })
   };
 
@@ -54,56 +51,12 @@ angular.module('classdamagesApp')
     results.summaryResults.get().$promise
     .then(function(res){
       $scope.resultsByAccountFIFO = res.resultsByAccountFIFO;
-      console.log("this is statsByAccountFIFO: ", $scope.resultsByAccountFIFO)
       $scope.totalsFIFO = res.totalsFIFO;
-      console.log("this is totalsFIFO: ", $scope.totalsFIFO)
       $scope.resultsByAccountLIFO = res.resultsByAccountLIFO;
-      console.log("this is statsByAccountLIFO: ", $scope.resultsByAccountLIFO)
       $scope.totalsLIFO = res.totalsLIFO;
-      console.log("this is totalsLIFO: ", $scope.totalsLIFO)
     })
     $scope.showNextPanel($scope.currentPanel);
   };
-
-// $scope.generesults = function(){
-//   stats.get({classEndDate: $scope.classEndDate})
-//   .$promise.then(function(stats){
-//     console.log("this is stats after then: ", stats)
-    
-
-    // for (var key in stats){
-    //   if (stats.hasOwnProperty(key) && key !== "$promise" && key !== "$resolved"){
-    //     console.log("this is key and stats[key]: ", key + " " + stats[key])
-    //     var account = stats[key];
-    //     account.sharesRetained = account.buys_class - account.sales_classAllocated;
-    //     account.valueOfRetainedShares = account.sharesRetained*$scope.avgClosingPrice90Day;
-    //     account.damages_gain = account.proceeds_90DayAllocated + account.proceeds_classAllocated + (account.sharesRetained - account.sales_90DayAllocated)*$scope.avgClosingPrice90Day - account.expenditures_class;  
-    //     for(var key in account){
-    //       if (account.hasOwnProperty(key)){
-    //         var value = account[key];
-    //         console.log("this is value: ", value)
-    //         var totalsObject;
-    //         if ($scope.allocationType === "FIFO"){
-    //           totalsObject = $scope.totalsFIFO;
-    //         } else {
-    //           totalsObject = $scope.totalsLIFO;
-    //         }
-    //         totalsObject[key] += value;
-    //       }
-    //     }
-    //     console.log("this is totalsFIFO: ", $scope.totalsFIFO)
-    //   }
-    // }
-    // if ($scope.allocationType === 'FIFO'){
-    //   $scope.statsByAccountFIFO = stats;
-    // } else {
-    //   $scope.statsByAccountLIFO = stats;
-    // }
-
-
- 
-
-
 
   // Progress Bar Logic
 
