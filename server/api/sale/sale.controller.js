@@ -349,7 +349,6 @@ exports.resetAllocations = function(req, res){
       });
   })
   .then(function(){
-    console.log("buys reset")
   })
   .then(function(){
     return Sale.find({})
@@ -434,7 +433,6 @@ exports.allocateSales = function(req, res){
 
       BegHolding.findAllocatableBegHoldings(currentSale)
       .then(function(begAllocatables) {
-      // console.log("ONE - begAllocatables: ", begAllocatables)
       return Buy.findAllocatableBuys(begAllocatables, currentSale);
     })
       .then(function(buysArray){
